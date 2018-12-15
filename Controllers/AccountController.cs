@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using ContactManager.Models;
 using ContactManager.Models.AccountViewModels;
 using ContactManager.Services;
@@ -23,19 +22,16 @@ namespace ContactManager.Controllers
         private readonly IEmailSender _emailSender;
         private readonly ISmsSender _smsSender;
         private readonly ILogger _logger;
-        private readonly string _externalCookieScheme;
 
         public AccountController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            IOptions<IdentityCookieOptions> identityCookieOptions,
             IEmailSender emailSender,
             ISmsSender smsSender,
             ILoggerFactory loggerFactory)
         {
             _userManager = userManager;
             _signInManager = signInManager;
-            _externalCookieScheme = identityCookieOptions.Value.ExternalCookieAuthenticationScheme;
             _emailSender = emailSender;
             _smsSender = smsSender;
             _logger = loggerFactory.CreateLogger<AccountController>();
@@ -45,12 +41,17 @@ namespace ContactManager.Controllers
         // GET: /Account/Login
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> Login(string returnUrl = null)
+        public IActionResult Login(string returnUrl = null)
         {
-            // Clear the existing external cookie to ensure a clean login process
-            await HttpContext.Authentication.SignOutAsync(_externalCookieScheme);
-
             ViewData["ReturnUrl"] = returnUrl;
+            return View();
+        }
+
+        //
+        // GET /Account/AccessDenied
+        [HttpGet]
+        public IActionResult AccessDenied()
+        {
             return View();
         }
 
@@ -116,10 +117,10 @@ namespace ContactManager.Controllers
                 var result = await _userManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
-                    // For more information on how to enable account confirmation and password reset please visit https://go.microsoft.com/fwlink/?LinkID=532713
+                    // For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=532713
                     // Send an email with this link
                     //var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                    //var callbackUrl = Url.Action(nameof(ConfirmEmail), "Account", new { userId = user.Id, code = code }, protocol: HttpContext.Request.Scheme);
+                    //var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: HttpContext.Request.Scheme);
                     //await _emailSender.SendEmailAsync(model.Email, "Confirm your account",
                     //    $"Please confirm your account by clicking this link: <a href='{callbackUrl}'>link</a>");
                     await _signInManager.SignInAsync(user, isPersistent: false);
@@ -134,10 +135,10 @@ namespace ContactManager.Controllers
         }
 
         //
-        // POST: /Account/Logout
+        // POST: /Account/LogOff
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Logout()
+        public async Task<IActionResult> LogOff()
         {
             await _signInManager.SignOutAsync();
             _logger.LogInformation(4, "User logged out.");
@@ -152,7 +153,7 @@ namespace ContactManager.Controllers
         public IActionResult ExternalLogin(string provider, string returnUrl = null)
         {
             // Request a redirect to the external login provider.
-            var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Account", new { ReturnUrl = returnUrl });
+            var redirectUrl = Url.Action("ExternalLoginCallback", "Account", new { ReturnUrl = returnUrl });
             var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
             return Challenge(properties, provider);
         }
@@ -269,17 +270,17 @@ namespace ContactManager.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = await _userManager.FindByEmailAsync(model.Email);
+                var user = await _userManager.FindByNameAsync(model.Email);
                 if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
                 {
                     // Don't reveal that the user does not exist or is not confirmed
                     return View("ForgotPasswordConfirmation");
                 }
 
-                // For more information on how to enable account confirmation and password reset please visit https://go.microsoft.com/fwlink/?LinkID=532713
+                // For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=532713
                 // Send an email with this link
                 //var code = await _userManager.GeneratePasswordResetTokenAsync(user);
-                //var callbackUrl = Url.Action(nameof(ResetPassword), "Account", new { userId = user.Id, code = code }, protocol: HttpContext.Request.Scheme);
+                //var callbackUrl = Url.Action("ResetPassword", "Account", new { userId = user.Id, code = code }, protocol: HttpContext.Request.Scheme);
                 //await _emailSender.SendEmailAsync(model.Email, "Reset Password",
                 //   $"Please reset your password by clicking here: <a href='{callbackUrl}'>link</a>");
                 //return View("ForgotPasswordConfirmation");
@@ -318,7 +319,7 @@ namespace ContactManager.Controllers
             {
                 return View(model);
             }
-            var user = await _userManager.FindByEmailAsync(model.Email);
+            var user = await _userManager.FindByNameAsync(model.Email);
             if (user == null)
             {
                 // Don't reveal that the user does not exist
@@ -443,14 +444,6 @@ namespace ContactManager.Controllers
             }
         }
 
-        //
-        // GET /Account/AccessDenied
-        [HttpGet]
-        public IActionResult AccessDenied()
-        {
-            return View();
-        }
-
         #region Helpers
 
         private void AddErrors(IdentityResult result)
@@ -459,6 +452,11 @@ namespace ContactManager.Controllers
             {
                 ModelState.AddModelError(string.Empty, error.Description);
             }
+        }
+
+        private Task<ApplicationUser> GetCurrentUserAsync()
+        {
+            return _userManager.GetUserAsync(HttpContext.User);
         }
 
         private IActionResult RedirectToLocal(string returnUrl)

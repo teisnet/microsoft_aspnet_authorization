@@ -4,17 +4,17 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using ContactManager.Data;
-using ContactManager.Models;
 
 namespace ContactManager.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20160721015310_userID")]
+    partial class userID
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
-                .HasAnnotation("ProductVersion", "1.0.3")
+                .HasAnnotation("ProductVersion", "1.0.0-rtm-21431")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
             modelBuilder.Entity("ContactManager.Models.ApplicationUser", b =>
@@ -27,7 +27,7 @@ namespace ContactManager.Data.Migrations
                         .IsConcurrencyToken();
 
                     b.Property<string>("Email")
-                        .HasMaxLength(256);
+                        .HasAnnotation("MaxLength", 256);
 
                     b.Property<bool>("EmailConfirmed");
 
@@ -36,10 +36,10 @@ namespace ContactManager.Data.Migrations
                     b.Property<DateTimeOffset?>("LockoutEnd");
 
                     b.Property<string>("NormalizedEmail")
-                        .HasMaxLength(256);
+                        .HasAnnotation("MaxLength", 256);
 
                     b.Property<string>("NormalizedUserName")
-                        .HasMaxLength(256);
+                        .HasAnnotation("MaxLength", 256);
 
                     b.Property<string>("PasswordHash");
 
@@ -52,7 +52,7 @@ namespace ContactManager.Data.Migrations
                     b.Property<bool>("TwoFactorEnabled");
 
                     b.Property<string>("UserName")
-                        .HasMaxLength(256);
+                        .HasAnnotation("MaxLength", 256);
 
                     b.HasKey("Id");
 
@@ -83,8 +83,6 @@ namespace ContactManager.Data.Migrations
 
                     b.Property<string>("State");
 
-                    b.Property<int>("Status");
-
                     b.Property<string>("Zip");
 
                     b.HasKey("ContactId");
@@ -100,10 +98,10 @@ namespace ContactManager.Data.Migrations
                         .IsConcurrencyToken();
 
                     b.Property<string>("Name")
-                        .HasMaxLength(256);
+                        .HasAnnotation("MaxLength", 256);
 
                     b.Property<string>("NormalizedName")
-                        .HasMaxLength(256);
+                        .HasAnnotation("MaxLength", 256);
 
                     b.HasKey("Id");
 

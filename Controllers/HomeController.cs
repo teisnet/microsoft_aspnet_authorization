@@ -1,17 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿#region snippet1
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ContactManager.Controllers
 {
+    [AllowAnonymous]
     public class HomeController : Controller
     {
         public IActionResult Index()
         {
             return View();
         }
+#endregion
 
         public IActionResult About()
         {

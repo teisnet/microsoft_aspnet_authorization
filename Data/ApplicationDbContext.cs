@@ -23,6 +23,6 @@ namespace ContactManager.Data
             // Add your customizations after calling base.OnModelCreating(builder);
         }
 
-        public DbSet<ContactManager.Models.Contact> Contact { get; set; }
+        public DbSet<Contact> Contact { get; set; }
     }
 }
