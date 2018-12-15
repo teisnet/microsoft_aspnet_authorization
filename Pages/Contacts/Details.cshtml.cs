@@ -28,7 +28,7 @@ namespace ContactManager.Pages.Contacts
                 return NotFound();
             }
 
-            Contact = await _context.Contact.SingleOrDefaultAsync(m => m.ContactId == id);
+            Contact = await _context.Contact.FirstOrDefaultAsync(m => m.ContactId == id);
 
             if (Contact == null)
             {

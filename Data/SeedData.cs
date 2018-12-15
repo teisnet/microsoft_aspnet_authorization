@@ -76,5 +76,6 @@ namespace ContactManager.Data
              );
             context.SaveChanges();
         }
+
     }
 }
