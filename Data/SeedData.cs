@@ -1,12 +1,11 @@
-﻿
-using ContactManager.Models;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using ContactManager.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+
+// dotnet aspnet-codegenerator razorpage -m Contact -dc ApplicationDbContext -udl -outDir Pages\Contacts --referenceScriptLibraries
 
 namespace ContactManager.Data
 {
@@ -16,32 +15,12 @@ namespace ContactManager.Data
         {
             using (var context = new ApplicationDbContext(
                 serviceProvider.GetRequiredService<DbContextOptions<ApplicationDbContext>>()))
-            {
-                var uid = await CreateTestUser(serviceProvider, testUserPw);
-                SeedDB(context, uid);
+            {              
+                SeedDB(context, "0");
             }
-        }
+        }        
 
-        private static async Task<string> CreateTestUser(IServiceProvider serviceProvider, string testUserPw)
-        {
-            if (String.IsNullOrEmpty(testUserPw))
-                return "";
-
-            const string SeedUserName = "test@example.com";
-
-            var userManager = serviceProvider.GetService<UserManager<ApplicationUser>>();
-
-            var user = await userManager.FindByNameAsync(SeedUserName);
-            if (user == null)
-            {
-                user = new ApplicationUser { UserName = SeedUserName };
-                await userManager.CreateAsync(user, testUserPw);
-            }
-
-            return user.Id;
-        }
-
-        public static void SeedDB(ApplicationDbContext context, string uid)
+        public static void SeedDB(ApplicationDbContext context, string adminID)
         {
             if (context.Contact.Any())
             {
@@ -58,15 +37,15 @@ namespace ContactManager.Data
                     Zip = "10999",
                     Email = "debra@example.com"
                 },
-             new Contact
-             {
-                 Name = "Thorsten Weinrich",
-                 Address = "5678 1st Ave W",
-                 City = "Redmond",
-                 State = "WA",
-                 Zip = "10999",
-                 Email = "thorsten@example.com"
-             },
+                new Contact
+                {
+                    Name = "Thorsten Weinrich",
+                    Address = "5678 1st Ave W",
+                    City = "Redmond",
+                    State = "WA",
+                    Zip = "10999",
+                    Email = "thorsten@example.com"
+                },
              new Contact
              {
                  Name = "Yuhong Li",
