@@ -1,24 +1,34 @@
+using ContactManager.Authorization;
 using ContactManager.Data;
 using ContactManager.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ContactManager
 {
+    #region snippet_env
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IHostingEnvironment env)
         {
             Configuration = configuration;
+            Environment = env;
         }
 
         public IConfiguration Configuration { get; }
+        private IHostingEnvironment Environment { get; }
+        #endregion
 
-        // This method gets called by the runtime. Use this method to add services to the container.
+        #region ConfigureServices
+        #region snippet_defaultPolicy
+        #region snippet_SSL 
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<ApplicationDbContext>(options =>
@@ -28,19 +38,51 @@ namespace ContactManager
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
-            services.AddMvc()
-                .AddRazorPagesOptions(options =>
+            var skipHTTPS = Configuration.GetValue<bool>("LocalTest:skipHTTPS");
+            // requires using Microsoft.AspNetCore.Mvc;
+            services.Configure<MvcOptions>(options =>
+            {
+                // Set LocalTest:skipHTTPS to true to skip SSL requrement in 
+                // debug mode. This is useful when not using Visual Studio.
+                if (Environment.IsDevelopment() && !skipHTTPS)
                 {
-                    options.Conventions.AuthorizeFolder("/Account/Manage");
-                    options.Conventions.AuthorizePage("/Account/Logout");
-                });
+                    options.Filters.Add(new RequireHttpsAttribute());
+                }
+            });
+            #endregion
 
-            // Register no-op EmailSender used by account confirmation and password reset during development
-            // For more information on how to enable account confirmation and password reset please visit https://go.microsoft.com/fwlink/?LinkID=532713
+            // services.AddMvc();
+                //.AddRazorPagesOptions(options =>
+                //{
+                //    options.Conventions.AuthorizeFolder("/Account/Manage");
+                //    options.Conventions.AuthorizePage("/Account/Logout");
+                //});
+
             services.AddSingleton<IEmailSender, EmailSender>();
-        }
+           
+            // requires: using Microsoft.AspNetCore.Authorization;
+            //           using Microsoft.AspNetCore.Mvc.Authorization;
+            services.AddMvc(config =>
+            {
+                var policy = new AuthorizationPolicyBuilder()
+                                 .RequireAuthenticatedUser()
+                                 .Build();
+                config.Filters.Add(new AuthorizeFilter(policy));
+            });
+            #endregion
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+            // Authorization handlers.
+            services.AddScoped<IAuthorizationHandler,
+                                  ContactIsOwnerAuthorizationHandler>();
+
+            services.AddSingleton<IAuthorizationHandler,
+                                  ContactAdministratorsAuthorizationHandler>();
+
+            services.AddSingleton<IAuthorizationHandler,
+                                  ContactManagerAuthorizationHandler>();
+        }
+        #endregion
+
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             if (env.IsDevelopment())
