@@ -2,12 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
-    <UserSecretsId>aspnet-ContactManager-7A098A32-4BE0-4A2D-89E1-F082633B4EC9</UserSecretsId>
+    <UserSecretsId>aspnet-ContactManager-D417BC05-C479-42BC-AF34-D66D67E94C27</UserSecretsId>
+    <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
   </PropertyGroup>
 
+
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.1" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.AspNetCore.App"/>
+    <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
   </ItemGroup>
 
 </Project>
