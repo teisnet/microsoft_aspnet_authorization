@@ -17,7 +17,10 @@ namespace ContactManager
     {
         public static void Main(string[] args)
         {
-            var host = CreateWebHostBuilder(args).Build();
+			var hostBuilder = CreateWebHostBuilder(args);
+
+			// Calls Startup.ConfigureServices
+			var host = hostBuilder.Build();
 
             using (var scope = host.Services.CreateScope())
             {
@@ -42,6 +45,7 @@ namespace ContactManager
                 }
             }
 
+			// Calls Startup.Configure
             host.Run();
         }
 

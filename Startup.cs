@@ -62,6 +62,7 @@ namespace ContactManager
             services.AddSingleton<IAuthorizationHandler, ContactManagerAuthorizationHandler>();
         }
 
+		// Called by host.Run()
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {

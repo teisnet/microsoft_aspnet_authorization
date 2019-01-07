@@ -8,9 +8,15 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace ContactManager.Pages
 {
+	// The class is instantiated at each HTTP request
     [AllowAnonymous]
     public class IndexModel : PageModel
     {
+		public IndexModel()
+		{
+			Console.WriteLine(new Guid());
+		}
+
         public void OnGet()
         {
 
